@@ -64,7 +64,11 @@ func main() {
 				Action: func(c *cli.Context) error {
 					err := os.MkdirAll(".vilo", 0755)
 					if err != nil {
-						fmt.Println("Error while creating a dir, ", err)
+						fmt.Println("Error while creating a .vilo dir, ", err)
+					}
+					err = os.MkdirAll(".vilo/objects", 0755)
+					if err != nil {
+						fmt.Println("Error while creating a objects dir, ", err)
 					}
 					headPath := ".vilo/HEAD"
 					if _, err := os.Stat(headPath); err != nil {
@@ -83,7 +87,6 @@ func main() {
 		},
 	}
 
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
-	}
+	log.Fatal(app.Run(os.Args))
+
 }
