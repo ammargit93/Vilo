@@ -15,9 +15,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	// "crypto/sha256"
-	// "encoding/hex"
-
 	"github.com/urfave/cli"
 )
 
@@ -196,6 +193,9 @@ func main() {
 					f.Close()
 
 					hash := sha256.Sum256([]byte(commitMsg))
+					f, _ = os.OpenFile(".vilo/HEAD", os.O_WRONLY|os.O_APPEND, 0644)
+					f.WriteString(hex.EncodeToString(hash[:]))
+					f.Close()
 					commitDir := ".vilo/objects/" + hex.EncodeToString(hash[:]) + "/"
 					os.MkdirAll(commitDir, 0755)
 
@@ -208,9 +208,8 @@ func main() {
 							continue
 						}
 						CreateFile(outputPath)
-						val, _ := os.Getwd()
-						DecryptAndDecompress(outputPath, val, key)
 					}
+
 					fmt.Println("Commit successful!")
 					DeleteJSONContent()
 					return nil
