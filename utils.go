@@ -1,74 +1,17 @@
-type Node struct {
-	hash      string
-	data      interface{}
-	commitMsg string
-	next      *Node
-	currTime  time.Time
-	nodeName  string
-}
-
-func NewNode(hash string, data interface{}, commitMsg string, next *Node, currTime time.Time, nodeName string) Node {
-	return Node{
-		hash:      hash,
-		data:      data,
-		commitMsg: commitMsg,
-		next:      next,
-		currTime:  currTime,
-		nodeName:  nodeName,
-	}
-}
-
-func AddNode(head *Node, newnode Node) *Node {
-	h := head
-	for {
-		if head.next == nil {
-			head.next = &newnode
-			break
-		}
-		head = head.next
-		fmt.Println("loop")
-	}
-	head = h
-	return head
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package main
 
 import (
+	"bytes"
 	"compress/gzip"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"fmt"
 	"io"
+	"mime/multipart"
+	"net/http"
 	"os"
 )
-
-func main() {
-	inputFile := "script.py"           // Python script file to compress and encrypt
-	encryptedFile := "script.enc"      // Encrypted and compressed output
-	decryptedFile := "script_decrypted.py" // Decrypted output file
-
-	key := []byte("thisis32bytekeythisis32bytekey!") // Replace with a secure key
-	EncryptAndCompress(inputFile, encryptedFile, key)
-	fmt.Println("File successfully compressed and encrypted:", encryptedFile)
-	DecryptAndDecompress(encryptedFile, decryptedFile, key)
-	fmt.Println("File successfully decrypted and decompressed:", decryptedFile)
-}
 
 func EncryptAndCompress(inputPath, outputPath string, key []byte) error {
 	inputFile, err := os.Open(inputPath)
@@ -126,4 +69,79 @@ func DecryptAndDecompress(inputPath, outputPath string, key []byte) error {
 	defer outputFile.Close()
 	_, err = io.Copy(outputFile, gzipReader)
 	return err
+}
+
+func DeleteJSONContent() {
+	f, err := os.OpenFile(".vilo/stage.json", os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		fmt.Println("Error deleting content of the File")
+	}
+	f.Close()
+}
+
+func CreateFile(file string) {
+	if _, err := os.Stat(file); err != nil {
+		if os.IsNotExist(err) {
+			_, err = os.Create(file)
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			fmt.Println(file + "already exists")
+		}
+	}
+}
+
+func sendFile(url, filePath string) error {
+	// Open the file to be uploaded
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	// Create a buffer to hold the form data
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
+
+	// Create a form file field and write the file data to it
+	part, err := writer.CreateFormFile("file", filePath)
+	if err != nil {
+		return fmt.Errorf("failed to create form file: %v", err)
+	}
+
+	// Copy the file data to the form field
+	_, err = io.Copy(part, file)
+	if err != nil {
+		return fmt.Errorf("failed to copy file data: %v", err)
+	}
+
+	// Close the writer to finalize the form data
+	writer.Close()
+
+	// Create the HTTP request with the multipart form data
+	req, err := http.NewRequest("POST", url, &requestBody)
+	if err != nil {
+		return fmt.Errorf("failed to create HTTP request: %v", err)
+	}
+
+	// Set the content type header for the multipart form
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	// Send the HTTP request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send HTTP request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Check if the request was successful
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to upload file, status code: %d", resp.StatusCode)
+	}
+
+	// File upload succeeded
+	fmt.Println("File uploaded successfully")
+	return nil
 }
