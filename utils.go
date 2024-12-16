@@ -92,7 +92,8 @@ func CreateFile(file string) {
 	}
 }
 
-func sendFile(url, filePath string) error {
+// SendFile sends a file to the given remote server URL
+func SendFile(url, filePath string) error {
 	// Open the file to be uploaded
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -100,35 +101,38 @@ func sendFile(url, filePath string) error {
 	}
 	defer file.Close()
 
-	// Create a buffer to hold the form data
+	// Create a buffer to store multipart form data
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
 
-	// Create a form file field and write the file data to it
+	// Create a form-data field for the file
 	part, err := writer.CreateFormFile("file", filePath)
 	if err != nil {
 		return fmt.Errorf("failed to create form file: %v", err)
 	}
 
-	// Copy the file data to the form field
+	// Copy the file content into the form-data field
 	_, err = io.Copy(part, file)
 	if err != nil {
 		return fmt.Errorf("failed to copy file data: %v", err)
 	}
 
-	// Close the writer to finalize the form data
-	writer.Close()
+	// Close the writer to finalize the form-data content
+	err = writer.Close()
+	if err != nil {
+		return fmt.Errorf("failed to close writer: %v", err)
+	}
 
-	// Create the HTTP request with the multipart form data
+	// Create the HTTP request with the form-data
 	req, err := http.NewRequest("POST", url, &requestBody)
 	if err != nil {
 		return fmt.Errorf("failed to create HTTP request: %v", err)
 	}
 
-	// Set the content type header for the multipart form
+	// Set the Content-Type header to multipart form-data
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 
-	// Send the HTTP request
+	// Send the request using the HTTP client
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -136,12 +140,12 @@ func sendFile(url, filePath string) error {
 	}
 	defer resp.Body.Close()
 
-	// Check if the request was successful
+	// Check the server response
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to upload file, status code: %d", resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("server error: %d, response: %s", resp.StatusCode, string(bodyBytes))
 	}
 
-	// File upload succeeded
-	fmt.Println("File uploaded successfully")
+	fmt.Println("File uploaded successfully!")
 	return nil
 }

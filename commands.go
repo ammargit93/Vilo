@@ -99,12 +99,7 @@ func PushCommand(link string) error {
 		}
 		if !info.IsDir() && strings.HasSuffix(info.Name(), ".enc") {
 			fmt.Println("Pushing file:", path)
-			file, err := os.Open(path)
-			if err != nil {
-				fmt.Println("Error opening file:", err)
-				return err
-			}
-			defer file.Close()
+			SendFile(link, path)
 
 		}
 		return nil

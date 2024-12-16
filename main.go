@@ -25,19 +25,14 @@ func main() {
 				Name:    "init",
 				Aliases: []string{""},
 				Usage:   "Initialises an empty vilo file",
-				Action: func(c *cli.Context) error {
-					return InitCommand()
-				},
+				Action:  func(c *cli.Context) error { return InitCommand() },
 			},
 			{
 				Name:    "add",
 				Aliases: []string{""},
 				Usage:   "Adds files to Staging area.",
 				Flags: []cli.Flag{
-					&cli.StringSliceFlag{
-						Name:  "files",
-						Usage: "File input paths",
-					},
+					&cli.StringSliceFlag{Name: "files", Usage: "File input paths"},
 				},
 				Action: func(c *cli.Context) error {
 					var filePaths = strings.Split(c.StringSlice("files")[0], ",")
@@ -53,10 +48,7 @@ func main() {
 				Aliases: []string{""},
 				Usage:   "Commit files .vilo",
 				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:  "Message",
-						Usage: "commit message",
-					},
+					&cli.StringFlag{Name: "Message", Usage: "commit message"},
 				},
 				Action: func(c *cli.Context) error {
 					commitMsg := c.String("Message")
@@ -72,10 +64,7 @@ func main() {
 				Aliases: []string{""},
 				Usage:   "Pushes committed files to a remote repository",
 				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:  "link",
-						Usage: "Link or IP address of the remote repository",
-					},
+					&cli.StringFlag{Name: "link", Usage: "Link or IP address of the remote repository"},
 				},
 				Action: func(c *cli.Context) error {
 					link := c.String("link")
