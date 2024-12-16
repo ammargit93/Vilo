@@ -92,47 +92,37 @@ func CreateFile(file string) {
 	}
 }
 
-// SendFile sends a file to the given remote server URL
 func SendFile(url, filePath string) error {
-	// Open the file to be uploaded
 	file, err := os.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %v", err)
 	}
 	defer file.Close()
 
-	// Create a buffer to store multipart form data
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
 
-	// Create a form-data field for the file
 	part, err := writer.CreateFormFile("file", filePath)
 	if err != nil {
 		return fmt.Errorf("failed to create form file: %v", err)
 	}
 
-	// Copy the file content into the form-data field
 	_, err = io.Copy(part, file)
 	if err != nil {
 		return fmt.Errorf("failed to copy file data: %v", err)
 	}
 
-	// Close the writer to finalize the form-data content
 	err = writer.Close()
 	if err != nil {
 		return fmt.Errorf("failed to close writer: %v", err)
 	}
 
-	// Create the HTTP request with the form-data
 	req, err := http.NewRequest("POST", url, &requestBody)
 	if err != nil {
 		return fmt.Errorf("failed to create HTTP request: %v", err)
 	}
 
-	// Set the Content-Type header to multipart form-data
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
-	// Send the request using the HTTP client
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -140,7 +130,6 @@ func SendFile(url, filePath string) error {
 	}
 	defer resp.Body.Close()
 
-	// Check the server response
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("server error: %d, response: %s", resp.StatusCode, string(bodyBytes))

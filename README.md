@@ -19,14 +19,14 @@
 
 ### Clone the Repository
 ```bash
-$ git clone https://github.com/yourusername/vilo.git
+$ git clone https://github.com/ammargit93/vilo.git
 $ cd vilo
 ```
 
 ### Build the CLI
 Run the following command to build the executable:
 ```bash
-$ go build -o vilo
+$ go build -o vilo.exe main.go utils.go commands.go
 ```
 
 This will create the `vilo` executable in the current directory.
