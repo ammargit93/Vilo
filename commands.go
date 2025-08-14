@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,7 +9,17 @@ import (
 	"strings"
 )
 
+type Node struct {
+	currHash string
+	prevHash *Node
+	nextHash *Node
+}
+
+var InitialNode Node
+var head *Node = nil
+
 func InitCommand() error {
+
 	err := os.MkdirAll(".vilo", 0755)
 	if err != nil {
 		fmt.Println("Error while creating a .vilo dir, ", err)
@@ -22,7 +30,9 @@ func InitCommand() error {
 	}
 
 	CreateFile(".vilo/HEAD")
+	CreateFile(".vilo/history")
 	CreateFile(".vilo/stage.json")
+	PrintLL(InitialNode)
 	return err
 }
 
@@ -54,19 +64,54 @@ func AddCommand(filePaths []string) error {
 	return nil
 }
 
+func PrintLL(InitialNode Node) {
+	head := &InitialNode
+	for head != nil {
+		fmt.Println(head.currHash)
+		head = head.nextHash
+	}
+}
+
+// func SaveLLToDisk(head *Node) {
+// 	f, _ := os.OpenFile(".vilo/HEAD", os.O_WRONLY|os.O_APPEND, 0644)
+// 	n, err := f.Read(256)
+// }
+
+func LoadFromDisk() {
+	data, err := os.ReadFile(".vilo/HEAD")
+	if err != nil {
+		fmt.Println(err)
+	}
+	InitialNode = Node{
+		prevHash: nil,
+		currHash: string(data),
+		nextHash: nil,
+	}
+
+}
+
 func CommitCommand(commitMsg string) error {
+
 	f, _ := os.Open(".vilo/stage.json")
 	decoder := json.NewDecoder(f)
 	decoder.Decode(&StagingArea)
 	f.Close()
 
-	hash := sha256.Sum256([]byte(commitMsg))
-	f, _ = os.OpenFile(".vilo/HEAD", os.O_WRONLY|os.O_TRUNC, 0644)
-	f.Close()
-	f, _ = os.OpenFile(".vilo/HEAD", os.O_WRONLY|os.O_APPEND, 0644)
-	f.WriteString(hex.EncodeToString(hash[:]))
-	f.Close()
-	commitDir := ".vilo/objects/" + hex.EncodeToString(hash[:]) + "/"
+	hashedCommit := GenerateCommitHash(commitMsg, StagingArea)
+
+	if err := os.WriteFile(".vilo/HEAD", []byte(hashedCommit), 0644); err != nil {
+		return err
+	}
+	f, err := os.OpenFile(".vilo/history", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if _, err := f.WriteString(hashedCommit + " " + commitMsg + "\n"); err != nil {
+		return err
+	}
+
+	commitDir := ".vilo/objects/" + hashedCommit + "/"
 	os.MkdirAll(commitDir, 0755)
 
 	for _, file := range StagingArea {
@@ -81,29 +126,7 @@ func CommitCommand(commitMsg string) error {
 	}
 
 	fmt.Println("Commit successful!")
+
 	DeleteJSONContent()
 	return nil
 }
-
-// func PushCommand(link string) error {
-// 	headFile, _ := os.Open(".vilo/HEAD")
-// 	defer headFile.Close()
-// 	hashBytes, _ := io.ReadAll(headFile)
-// 	hashString := strings.TrimSpace(string(hashBytes))
-// 	commitDir := filepath.Join(".vilo", "objects", hashString)
-// 	err := filepath.Walk(commitDir, func(path string, info os.FileInfo, err error) error {
-// 		if err != nil {
-// 			fmt.Println("Error accessing path:", path, err)
-// 			return err
-// 		}
-// 		if !info.IsDir() && strings.HasSuffix(info.Name(), ".enc") {
-// 			fmt.Println("Pushing file:", path)
-// 			// SendFile(link, path)
-
-// 		}
-// 		return nil
-// 	})
-
-// 	fmt.Println("Push completed successfully!")
-// 	return err
-// }

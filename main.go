@@ -56,25 +56,10 @@ func main() {
 						fmt.Println("Please provide a commit message using --Message flag")
 						return nil
 					}
+
 					return CommitCommand(commitMsg)
 				},
 			},
-			// {
-			// 	Name:    "push",
-			// 	Aliases: []string{""},
-			// 	Usage:   "Pushes committed files to a remote repository",
-			// 	Flags: []cli.Flag{
-			// 		&cli.StringFlag{Name: "link", Usage: "Link or IP address of the remote repository"},
-			// 	},
-			// 	Action: func(c *cli.Context) error {
-			// 		link := c.String("link")
-			// 		if link == "" {
-			// 			fmt.Println("Please provide a valid link using --link flag")
-			// 			return nil
-			// 		}
-			// 		return PushCommand(link)
-			// 	},
-			// },
 		},
 	}
 
