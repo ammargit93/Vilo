@@ -60,6 +60,16 @@ func main() {
 					return CommitCommand(commitMsg)
 				},
 			},
+			{
+				Name:    "show",
+				Aliases: []string{""},
+				Usage:   "Displays all commits.",
+				Flags:   []cli.Flag{},
+				Action: func(c *cli.Context) error {
+					ShowCommits()
+					return nil
+				},
+			},
 		},
 	}
 

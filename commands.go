@@ -32,7 +32,6 @@ func InitCommand() error {
 	CreateFile(".vilo/HEAD")
 	CreateFile(".vilo/history")
 	CreateFile(".vilo/stage.json")
-	PrintLL(InitialNode)
 	return err
 }
 
@@ -62,32 +61,6 @@ func AddCommand(filePaths []string) error {
 	}
 	fmt.Println(StagingArea)
 	return nil
-}
-
-func PrintLL(InitialNode Node) {
-	head := &InitialNode
-	for head != nil {
-		fmt.Println(head.currHash)
-		head = head.nextHash
-	}
-}
-
-// func SaveLLToDisk(head *Node) {
-// 	f, _ := os.OpenFile(".vilo/HEAD", os.O_WRONLY|os.O_APPEND, 0644)
-// 	n, err := f.Read(256)
-// }
-
-func LoadFromDisk() {
-	data, err := os.ReadFile(".vilo/HEAD")
-	if err != nil {
-		fmt.Println(err)
-	}
-	InitialNode = Node{
-		prevHash: nil,
-		currHash: string(data),
-		nextHash: nil,
-	}
-
 }
 
 func CommitCommand(commitMsg string) error {
@@ -129,4 +102,13 @@ func CommitCommand(commitMsg string) error {
 
 	DeleteJSONContent()
 	return nil
+}
+
+func ShowCommits() {
+	f, _ := os.ReadFile(".vilo/history")
+	fmt.Println(string(f))
+}
+
+func RollBack(commitHash string) {
+
 }
