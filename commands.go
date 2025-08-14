@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -108,7 +109,36 @@ func ShowCommits() {
 	f, _ := os.ReadFile(".vilo/history")
 	fmt.Println(string(f))
 }
+func safeSplit(path string) string {
+	path = filepath.ToSlash(path)
+	parts := strings.Split(path, "/")
+	if len(parts) > 3 {
+		return strings.Join(parts[3:], "/")
+	}
+	return path
+}
 
-func RollBack(commitHash string) {
+func RollBack(commitHash string, backupFolderName string) {
+	commitDir := ".vilo/objects/" + commitHash + "/"
+	_ = filepath.WalkDir(commitDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		actualPath := safeSplit(path)
+		actualPath = strings.TrimSuffix(actualPath, ".enc")
+
+		outputPath := filepath.Join(backupFolderName, actualPath)
+
+		os.MkdirAll(filepath.Dir(outputPath), 0755)
+
+		fmt.Println(actualPath)
+		err = DecryptAndDecompress(path, outputPath, key)
+		if err != nil {
+			fmt.Println("Error restoring", path, ":", err)
+		} else {
+			fmt.Println("Restored", outputPath)
+		}
+		return nil
+	})
 
 }

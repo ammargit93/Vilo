@@ -70,6 +70,34 @@ func main() {
 					return nil
 				},
 			},
+			{
+				Name:    "rollback",
+				Aliases: []string{""},
+				Usage:   "Rolls back to previous or future commits.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "hash", Usage: "commit hash"},
+					&cli.StringFlag{Name: "foldername", Usage: "backup folder name"},
+				},
+				Action: func(c *cli.Context) error {
+					commitHash := c.String("hash")
+					backupFolderName := c.String("foldername")
+					if commitHash == "" {
+						fmt.Println("Please provide a commit hash using --hash flag")
+						return nil
+					}
+					if backupFolderName == "." {
+						backupFolderName, err := os.Getwd()
+						if err != nil {
+							return nil
+						}
+						RollBack(commitHash, backupFolderName)
+					} else {
+						RollBack(commitHash, backupFolderName)
+					}
+
+					return nil
+				},
+			},
 		},
 	}
 
