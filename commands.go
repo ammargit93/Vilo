@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -86,25 +85,25 @@ func CommitCommand(commitMsg string) error {
 	return nil
 }
 
-func PushCommand(link string) error {
-	headFile, _ := os.Open(".vilo/HEAD")
-	defer headFile.Close()
-	hashBytes, _ := io.ReadAll(headFile)
-	hashString := strings.TrimSpace(string(hashBytes))
-	commitDir := filepath.Join(".vilo", "objects", hashString)
-	err := filepath.Walk(commitDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			fmt.Println("Error accessing path:", path, err)
-			return err
-		}
-		if !info.IsDir() && strings.HasSuffix(info.Name(), ".enc") {
-			fmt.Println("Pushing file:", path)
-			SendFile(link, path)
+// func PushCommand(link string) error {
+// 	headFile, _ := os.Open(".vilo/HEAD")
+// 	defer headFile.Close()
+// 	hashBytes, _ := io.ReadAll(headFile)
+// 	hashString := strings.TrimSpace(string(hashBytes))
+// 	commitDir := filepath.Join(".vilo", "objects", hashString)
+// 	err := filepath.Walk(commitDir, func(path string, info os.FileInfo, err error) error {
+// 		if err != nil {
+// 			fmt.Println("Error accessing path:", path, err)
+// 			return err
+// 		}
+// 		if !info.IsDir() && strings.HasSuffix(info.Name(), ".enc") {
+// 			fmt.Println("Pushing file:", path)
+// 			// SendFile(link, path)
 
-		}
-		return nil
-	})
+// 		}
+// 		return nil
+// 	})
 
-	fmt.Println("Push completed successfully!")
-	return err
-}
+// 	fmt.Println("Push completed successfully!")
+// 	return err
+// }
