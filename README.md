@@ -1,7 +1,6 @@
-# Vilo: A Lightweight Version Control CLI Tool
+# Vilo: A Lightweight backup CLI Tool
 
-`vilo` is a simple version control system written in Go, designed to handle file versioning, encryption, and compression using AES and Gzip.
-
+`vilo` is a simple version control and backup system written in Go, designed to handle file versioning, encryption, and compression using AES and Gzip.
 ---
 
 ## Features
@@ -10,7 +9,7 @@
 3. **Commit**: Encrypt, compress, and save staged files into the `.vilo/objects` directory.
 4. **Secure Storage**: Files are stored securely with AES encryption.
 5. **Custom Commit Messages**: Tag your commits with meaningful messages.
-
+6. **Rollback**: Rollback to previous commits.
 ---
 
 ## Installation
@@ -20,16 +19,16 @@
 ### Clone the Repository
 ```bash
 $ git clone https://github.com/ammargit93/vilo.git
-$ cd vilo
+$ cd Vilo
 ```
 
 ### Build the CLI
 Run the following command to build the executable:
 ```bash
-$ go build -o vilo.exe main.go utils.go commands.go
+$ go build -o vilo.exe .
 ```
 
-This will create the `vilo` executable in the current directory.
+This will create the `vilo.exe` executable in the current directory.
 
 ---
 
@@ -67,9 +66,15 @@ Commit successful!
 
 Committed files are encrypted, compressed, and saved into `.vilo/objects/<hash>/`.
 
-### View Staging Area
-You can check the staged files by viewing `.vilo/stage.json`.
-
+### View commits
+```bash
+$ vilo show
+```
+## Rollback
+Rollbacks to specified commit with the hash values mentioned with the '--hash' flag, descrypts and decompresses inside the directory specified by the '--foldername' flag.
+```bash
+$ vilo rollback --hash <commit-hash> --foldername <directory>
+```
 ---
 
 ## Internals
@@ -83,34 +88,21 @@ After a commit, the structure looks like this:
 ```
 .vilo/
 ├── HEAD
-├── objects/
-│   └── <commit-hash>/
-│       ├── file1.txt.enc
-│       └── file2.txt.enc
-└── stage.json
+├── history
+├── stage.json
+└── objects/
+    └── <commit-hash>/
+        ├── file1.txt.enc
+        └── file2.txt.enc
 ```
-
 ---
 
 ## Future Improvements
-- Add `log` command to view commit history.
-- Implement `checkout` to restore previous versions.
-- Add diff functionality to compare file changes.
-
----
+Remote sync with Google drive, dropbox, AWS S3.
 
 ## Contributing
 Feel free to fork this repository and submit pull requests!
 
----
-
-## License
-This project is licensed under the MIT License. See `LICENSE` for details.
-
----
 
 ## Author
 **Ammar Ansari**
-
-For any questions or suggestions.
-

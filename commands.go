@@ -90,13 +90,9 @@ func CommitCommand(commitMsg string) error {
 
 	for _, file := range StagingArea {
 		fileName := filepath.Base(file)
-		outputPath := commitDir + fileName + ".enc"
-		err := EncryptAndCompress(file, outputPath, key)
-		if err != nil {
-			fmt.Printf("Error encrypting file %s: %v\n", file, err)
-			continue
-		}
-		CreateFile(outputPath)
+		fmt.Println(fileName)
+		ScanDirRecursively(file, commitDir)
+
 	}
 
 	fmt.Println("Commit successful!")
