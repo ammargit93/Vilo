@@ -18,7 +18,7 @@ func main() {
 
 	var app = &cli.App{
 		Name:    "vilo",
-		Usage:   "A version control CLI application",
+		Usage:   "A backup CLI tool",
 		Version: "0.1.0",
 		Commands: []cli.Command{
 			{

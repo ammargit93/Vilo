@@ -10,15 +10,6 @@ import (
 	"strings"
 )
 
-type Node struct {
-	currHash string
-	prevHash *Node
-	nextHash *Node
-}
-
-var InitialNode Node
-var head *Node = nil
-
 func InitCommand() error {
 
 	err := os.MkdirAll(".vilo", 0755)
@@ -89,10 +80,7 @@ func CommitCommand(commitMsg string) error {
 	os.MkdirAll(commitDir, 0755)
 
 	for _, file := range StagingArea {
-		fileName := filepath.Base(file)
-		fmt.Println(fileName)
-		ScanDirRecursively(file, commitDir)
-
+		ScanRecursively(file, commitDir)
 	}
 
 	fmt.Println("Commit successful!")
@@ -105,14 +93,6 @@ func ShowCommits() {
 	f, _ := os.ReadFile(".vilo/history")
 	fmt.Println(string(f))
 }
-func safeSplit(path string) string {
-	path = filepath.ToSlash(path)
-	parts := strings.Split(path, "/")
-	if len(parts) > 3 {
-		return strings.Join(parts[3:], "/")
-	}
-	return path
-}
 
 func RollBack(commitHash string, backupFolderName string) {
 	commitDir := ".vilo/objects/" + commitHash + "/"
@@ -120,7 +100,7 @@ func RollBack(commitHash string, backupFolderName string) {
 		if err != nil {
 			return err
 		}
-		actualPath := safeSplit(path)
+		actualPath := SafeSplit(path)
 		actualPath = strings.TrimSuffix(actualPath, ".enc")
 
 		outputPath := filepath.Join(backupFolderName, actualPath)

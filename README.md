@@ -77,7 +77,6 @@ $ vilo rollback --hash <commit-hash> --foldername <directory>
 ```
 ---
 
-## Internals
 ### Encryption & Compression
 Files are:
 1. **Compressed** using Gzip to save space.

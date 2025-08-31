@@ -5,6 +5,9 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
+	"syscall"
 )
 
 func DeleteJSONContent() {
@@ -28,39 +31,53 @@ func CreateFile(file string) {
 	}
 }
 
-func ScanDirRecursively(rootDir, commitDir string) error {
-	cwd, _ := os.Getwd()
+func SafeSplit(path string) string {
+	path = filepath.ToSlash(path)
+	parts := strings.Split(path, "/")
+	if len(parts) > 3 {
+		return strings.Join(parts[3:], "/")
+	}
+	return path
+}
 
-	return filepath.Walk(rootDir, func(path string, info fs.FileInfo, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
+func IsHiddenFile(filename string) (bool, error) {
 
-		if info.IsDir() {
-			return nil // skip encrypting dirs themselves
-		}
-
-		// get relative path inside project (everything after cwd)
-		rel, err := filepath.Rel(cwd, path)
+	if runtime.GOOS == "windows" {
+		pointer, err := syscall.UTF16PtrFromString(filename)
 		if err != nil {
-			return err
+			return false, err
 		}
-
-		// add ".enc" and join with commit dir
-		outputPath := filepath.Join(commitDir, rel+".enc")
-
-		// make sure subdirectories exist before writing
-		if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
-			return err
+		attributes, err := syscall.GetFileAttributes(pointer)
+		if err != nil {
+			return false, err
 		}
-
-		// encrypt file → write to output path
-		if err := EncryptAndCompress(path, outputPath, key); err != nil {
-			fmt.Printf("Error encrypting file %s: %v\n", path, err)
-			return err
+		return attributes&syscall.FILE_ATTRIBUTE_HIDDEN != 0, nil
+	} else {
+		// unix/linux file or directory that starts with . is hidden
+		if filename[0:1] == "." {
+			return true, nil
 		}
+	}
+	return false, nil
+}
 
-		fmt.Println("Encrypted:", path, "→", outputPath)
-		return nil
+func ScanRecursively(blobName, commitDir string) error {
+	cwd, _ := os.Getwd()
+	return filepath.Walk(blobName, func(path string, info fs.FileInfo, err error) error {
+
+		b, ok := IsHiddenFile(path)
+		if ok != nil {
+			return ok
+		}
+		if info.IsDir() || b {
+			return nil
+		}
+		relPath, _ := filepath.Rel(cwd, path)
+		actual := filepath.Join(commitDir, relPath+".enc")
+
+		if err = os.MkdirAll(filepath.Dir(actual), 0755); err == nil {
+			EncryptAndCompress(path, actual, key)
+		}
+		return err
 	})
 }
