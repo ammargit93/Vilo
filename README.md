@@ -1,4 +1,4 @@
-# Vilo: A Lightweight backup CLI Tool
+Vilo: A Lightweight backup CLI Tool
 
 `vilo` is a simple version control and backup system written in Go, designed to handle file versioning, encryption, and compression using AES and Gzip.
 ---

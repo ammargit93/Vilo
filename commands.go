@@ -51,7 +51,7 @@ func AddCommand(filePaths []string) error {
 	if err := encoder.Encode(StagingArea); err != nil {
 		log.Fatalf("Error encoding data to JSON: %v", err)
 	}
-	fmt.Println(StagingArea)
+	// fmt.Println(StagingArea)
 	return nil
 }
 
@@ -91,6 +91,11 @@ func CommitCommand(commitMsg string) error {
 
 func ShowCommits() {
 	f, _ := os.ReadFile(".vilo/history")
+	fmt.Println(string(f))
+}
+
+func Status() {
+	f, _ := os.ReadFile(".vilo/stage.json")
 	fmt.Println(string(f))
 }
 

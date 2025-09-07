@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -80,4 +82,36 @@ func ScanRecursively(blobName, commitDir string) error {
 		}
 		return err
 	})
+}
+
+func remove(arr []string, path string) []string {
+	var newArr []string
+	for _, val := range arr {
+		val, _ := filepath.Abs(val)
+		if val != path {
+			newArr = append(newArr, val)
+		}
+	}
+	return newArr
+
+}
+
+func FilterIgnoredFiles(fileArr []string) []string {
+	projectRoot, _ := os.Getwd()
+	fileArr = remove(fileArr, projectRoot)
+	f, err := os.Open(".viloignore")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	// optionally, resize scanner's capacity for lines over 64K, see next example
+	for scanner.Scan() {
+		txt := scanner.Text()
+		trimmedPath := strings.TrimSpace(txt)
+		trimmedAbsPath, _ := filepath.Abs(trimmedPath)
+		fileArr = remove(fileArr, trimmedAbsPath)
+	}
+	return fileArr
 }
