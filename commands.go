@@ -80,16 +80,18 @@ func CommitCommand(commitMsg string) error {
 		fmt.Println(err)
 	}
 	if len(entries) == 0 {
-		if _, err := f.WriteString(hashedCommit + " " + commitMsg + "\n"); err != nil {
+		finalCommitName = hashedCommit + "_base"
+		if _, err := f.WriteString(finalCommitName + " " + commitMsg + "\n"); err != nil {
 			return err
 		}
-		finalCommitName = hashedCommit + "_base"
+
 	} else {
 		hashint := FindLatestCommit() + 1
-		if _, err := f.WriteString(hashedCommit + " " + commitMsg + "\n"); err != nil {
+		finalCommitName = hashedCommit + "_" + strconv.Itoa(hashint)
+		if _, err := f.WriteString(finalCommitName + " " + commitMsg + "\n"); err != nil {
 			return err
 		}
-		finalCommitName = hashedCommit + "_" + strconv.Itoa(hashint)
+
 	}
 
 	commitDir := ".vilo/objects/" + finalCommitName + "/"
