@@ -36,7 +36,6 @@ func main() {
 					var filePaths = strings.Split(c.StringSlice("files")[0], ",")
 					if filePaths[0] == "." {
 						pathToIterate, _ := os.Getwd()
-						// fmt.Println(pathToIterate)
 						entries, err := os.ReadDir(pathToIterate)
 						if err != nil {
 							log.Fatal(err)

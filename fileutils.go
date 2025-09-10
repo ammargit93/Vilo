@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -114,4 +115,22 @@ func FilterIgnoredFiles(fileArr []string) []string {
 		fileArr = remove(fileArr, trimmedAbsPath)
 	}
 	return fileArr
+}
+
+func FindLatestCommit() int {
+	entries, err := os.ReadDir(".vilo/objects")
+	if err != nil {
+		fmt.Println(err)
+	}
+	latestCommit := 0
+	for _, entry := range entries {
+		entryArr := strings.Split(entry.Name(), "_")
+		if entryArr[len(entryArr)-1] == "base" {
+			continue
+		}
+		latestCommitNum, _ := strconv.Atoi(entryArr[len(entryArr)-1])
+		latestCommit = max(latestCommitNum, latestCommit)
+	}
+
+	return latestCommit
 }

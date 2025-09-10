@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -63,6 +64,7 @@ func CommitCommand(commitMsg string) error {
 	f.Close()
 
 	hashedCommit := GenerateCommitHash(commitMsg, StagingArea)
+	var finalCommitName string
 
 	if err := os.WriteFile(".vilo/HEAD", []byte(hashedCommit), 0644); err != nil {
 		return err
@@ -72,11 +74,25 @@ func CommitCommand(commitMsg string) error {
 		return err
 	}
 	defer f.Close()
-	if _, err := f.WriteString(hashedCommit + " " + commitMsg + "\n"); err != nil {
-		return err
+
+	entries, err := os.ReadDir(".vilo/objects")
+	if err != nil {
+		fmt.Println(err)
+	}
+	if len(entries) == 0 {
+		if _, err := f.WriteString(hashedCommit + " " + commitMsg + "\n"); err != nil {
+			return err
+		}
+		finalCommitName = hashedCommit + "_base"
+	} else {
+		hashint := FindLatestCommit() + 1
+		if _, err := f.WriteString(hashedCommit + " " + commitMsg + "\n"); err != nil {
+			return err
+		}
+		finalCommitName = hashedCommit + "_" + strconv.Itoa(hashint)
 	}
 
-	commitDir := ".vilo/objects/" + hashedCommit + "/"
+	commitDir := ".vilo/objects/" + finalCommitName + "/"
 	os.MkdirAll(commitDir, 0755)
 
 	for _, file := range StagingArea {
