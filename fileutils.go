@@ -103,6 +103,7 @@ func FilterIgnoredFiles(fileArr []string) []string {
 	f, err := os.Open(".viloignore")
 	if err != nil {
 		log.Fatal(err)
+		return fileArr
 	}
 	defer f.Close()
 

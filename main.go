@@ -44,7 +44,13 @@ func main() {
 							filePaths = append(filePaths, e.Name())
 						}
 					}
-					filePaths = FilterIgnoredFiles(filePaths)
+					if _, err := os.Stat(".viloignore"); err == nil {
+						fmt.Println("File exists")
+					} else if os.IsNotExist(err) {
+						fmt.Println("File does not exist")
+					} else {
+						fmt.Println("Error checking file:", err)
+					}
 
 					if len(filePaths) == 0 {
 						fmt.Println("No files specified to add")
