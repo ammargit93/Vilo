@@ -1,7 +1,7 @@
-Vilo: A Lightweight backup CLI Tool
+# Vilo: A Lightweight backup CLI Tool
 
-`vilo` is a simple version control and backup system written in Go, designed to handle file versioning, encryption, and compression using AES and Gzip.
----
+**Vilo** is a simple version control and backup system written in Go, designed to handle file versioning, encryption, and compression using AES and Gzip.
+
 
 ## Features
 1. **Initialize**: Create the required `.vilo` directory structure.
@@ -82,7 +82,7 @@ Files are:
 1. **Compressed** using Gzip to save space.
 2. **Encrypted** using AES (CFB mode) for secure storage.
 
-### Directory Structure
+### .vilo Directory Structure
 After a commit, the structure looks like this:
 ```
 .vilo/
@@ -97,7 +97,10 @@ After a commit, the structure looks like this:
 ---
 
 ## Future Improvements
-Remote sync with Google drive, dropbox, AWS S3.
+- Remote sync with Google drive, dropbox, AWS S3.
+- Watch-mode to auto sync and commit on regular time intervals.
+- Authentication to secrets and custom AES keys.
+- Storing diffs instead of whole files.
 
 ## Contributing
 Feel free to fork this repository and submit pull requests!
